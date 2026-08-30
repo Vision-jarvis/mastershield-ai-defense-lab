@@ -24,9 +24,50 @@ from red_team.pipeline import red_team_sim
 from red_team.adversarial_optimizer import AdversarialEvolutionaryOptimizer
 from blue_team.classifiers.unified_engine import defense_engine
 from blue_team.classifiers.graph_anomaly import tier2_graph_detector
+from blue_team.classifiers.ensemble_detector import tier1_detector
+from blue_team.feature_engine import feature_engine
 from blue_team.explainability import explainability_engine
 from closed_loop.co_evolution_engine import coevolution_engine
 from closed_loop.benchmark_suite import benchmark_suite
+
+BOOTSTRAP_SAMPLES = 8000
+BOOTSTRAP_FRAUD_RATIO = 0.05
+
+
+def bootstrap_defense() -> Dict[str, Any]:
+    """
+    Ensures the cockpit is usable immediately on a fresh clone.
+
+    Without this, tier1_detector starts untrained and predict_single returns its
+    ALLOW fallback for every transaction, so the demo shows nothing being caught.
+    We first try a model persisted by scripts/run_benchmark.py; if none exists we
+    train a fast in-process bootstrap and warm the streaming graph.
+    """
+    import numpy as np
+    import pandas as pd
+
+    if tier1_detector.load_model():
+        status = "loaded_persisted_model"
+        print("[*] Loaded persisted Tier 1 model from models_saved/.")
+    else:
+        print(f"[*] No persisted model found. Training bootstrap on "
+              f"{BOOTSTRAP_SAMPLES:,} transactions (about 10s)...")
+        ds = red_team_sim.generate_synthetic_dataset(
+            total_samples=BOOTSTRAP_SAMPLES,
+            fraud_ratio=BOOTSTRAP_FRAUD_RATIO,
+            round_idx=0,
+            seed=42,
+        )
+        X = np.array([feature_engine.extract_features_single(t) for t in ds], dtype=np.float32)
+        y = np.array([t.is_fraud for t in ds], dtype=np.int32)
+        _, names = feature_engine.extract_features_df(pd.DataFrame([{"amount": 50.0}]))
+        tier1_detector.train(X, y, names)
+        for t in ds:
+            tier2_graph_detector.ingest_single_transaction(t)
+        status = "trained_bootstrap_model"
+        print(f"[*] Bootstrap complete. Graph warmed with {len(ds):,} transactions.")
+
+    return {"status": status, "tier1_trained": tier1_detector.is_trained}
 
 app = FastAPI(
     title="MasterShield AI - Red/Blue Defense Lab API",
@@ -43,6 +84,20 @@ app.add_middleware(
 )
 
 active_connections: List[WebSocket] = []
+
+BOOT_STATE: Dict[str, Any] = {"status": "pending", "tier1_trained": False}
+
+
+@app.on_event("startup")
+async def _startup_bootstrap():
+    """Warm the defense before the first request so the cockpit is live immediately."""
+    global BOOT_STATE
+    try:
+        BOOT_STATE = await asyncio.get_event_loop().run_in_executor(None, bootstrap_defense)
+        print("[*] MasterShield defense engine ready.")
+    except Exception as exc:  # keep the UI reachable even if warm-up fails
+        BOOT_STATE = {"status": f"bootstrap_failed: {exc}", "tier1_trained": False}
+        print(f"[!] Bootstrap failed: {exc}")
 
 
 class AttackSimulationRequest(BaseModel):
@@ -67,7 +122,12 @@ def get_health():
         "version": system_cfg.VERSION,
         "sla_target_ms": system_cfg.TOTAL_P99_SLA_MS,
         "supported_rails": rails_cfg.RAILS,
-        "attack_vectors_count": len(attacks_cfg.ATTACK_VECTORS)
+        "attack_vectors_count": len(attacks_cfg.ATTACK_VECTORS),
+        "simulated_vectors_count": sum(
+            1 for v in attacks_cfg.ATTACK_VECTORS.values() if v.get("is_simulated")
+        ),
+        "defense_ready": BOOT_STATE.get("tier1_trained", False),
+        "bootstrap": BOOT_STATE.get("status", "pending")
     }
 
 
