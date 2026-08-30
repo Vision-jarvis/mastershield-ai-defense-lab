@@ -245,29 +245,73 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // WebSocket Live Stream Connection
+  // Live Stream: WebSocket where available, HTTP polling on serverless hosts
+  let wsAttempts = 0;
+  let pollTimer = null;
+
+  function startPollingFallback() {
+    if (pollTimer) return;
+    wsStatusText.innerText = "LIVE STREAM CONNECTED (HTTP)";
+
+    const drain = (list) => {
+      list.forEach((tx, i) => setTimeout(() => handleIncomingTransaction(tx), i * 800));
+    };
+
+    const tick = () => {
+      fetch("/api/live_batch?count=6")
+        .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+        .then((d) => {
+          if (d && d.transactions) drain(d.transactions);
+          wsStatusText.innerText = "LIVE STREAM CONNECTED (HTTP)";
+        })
+        .catch(() => {
+          wsStatusText.innerText = "STREAM RECONNECTING...";
+        });
+    };
+
+    tick();
+    pollTimer = setInterval(tick, 5000);
+  }
+
   function initWebSocket() {
+    // Serverless deployments cannot hold a socket; skip straight to polling.
+    if (wsAttempts >= 2) {
+      startPollingFallback();
+      return;
+    }
+    wsAttempts += 1;
+
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/live_stream`;
-    
-    ws = new WebSocket(wsUrl);
-    
+
+    try {
+      ws = new WebSocket(wsUrl);
+    } catch (err) {
+      startPollingFallback();
+      return;
+    }
+
     ws.onopen = () => {
+      wsAttempts = 0;
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
       wsStatusText.innerText = "LIVE STREAM CONNECTED";
     };
-    
+
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        handleIncomingTransaction(data);
+        handleIncomingTransaction(JSON.parse(event.data));
       } catch (err) {
         console.error("WS parse error:", err);
       }
     };
-    
+
     ws.onclose = () => {
-      wsStatusText.innerText = "STREAM RECONNECTING...";
-      setTimeout(initWebSocket, 2000);
+      if (wsAttempts >= 2) {
+        startPollingFallback();
+      } else {
+        wsStatusText.innerText = "STREAM RECONNECTING...";
+        setTimeout(initWebSocket, 2000);
+      }
     };
   }
 

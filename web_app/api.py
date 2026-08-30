@@ -245,6 +245,57 @@ def get_graph_topology():
     }
 
 
+def _stream_one(round_counter: int = 1, force_attack: Optional[bool] = None) -> Dict[str, Any]:
+    """Generates one scored transaction in the live-stream payload shape."""
+    is_attack = force_attack if force_attack is not None else (time.time() % 8 < 0.25)
+    if is_attack:
+        vec_keys = list(red_team_sim.attack_generators.keys())
+        chosen = vec_keys[int(time.time() * 10) % len(vec_keys)]
+        tx = red_team_sim.attack_generators[chosen].generate_attack(round_idx=round_counter)[0]
+    else:
+        tx = red_team_sim.generate_benign_transaction(round_idx=round_counter)
+
+    verdict = defense_engine.evaluate_transaction(tx)
+    tier2_graph_detector.ingest_single_transaction(tx)
+
+    return {
+        "tx_id": tx.tx_id,
+        "timestamp": tx.timestamp.isoformat(),
+        "amount": tx.amount,
+        "currency": tx.currency,
+        "payment_rail": tx.payment_rail,
+        "merchant_name": tx.merchant_name,
+        "is_fraud_ground_truth": tx.is_fraud,
+        "attack_vector": tx.attack_vector,
+        "decision": verdict.decision,
+        "fraud_probability": verdict.fraud_probability,
+        "risk_tier": verdict.risk_tier,
+        "iso_rejection_code": verdict.iso_rejection_code,
+        "latency_ms": verdict.total_latency_ms,
+        "top_feature": verdict.shap_top_features[0] if verdict.shap_top_features else None,
+    }
+
+
+@app.get("/api/live_batch")
+def get_live_batch(count: int = 6):
+    """
+    HTTP fallback for the live stream.
+
+    Serverless platforms (Vercel, Cloud Run in request mode) do not hold
+    WebSocket connections, so the cockpit polls this endpoint instead. Returns
+    the same payload shape the WebSocket emits, with one guaranteed attack per
+    batch so the demo always shows the defense firing.
+    """
+    count = max(1, min(int(count), 25))
+    attack_slot = int(time.time()) % count
+    return {
+        "transactions": [
+            _stream_one(round_counter=1, force_attack=(i == attack_slot))
+            for i in range(count)
+        ]
+    }
+
+
 @app.websocket("/ws/live_stream")
 async def websocket_live_stream(websocket: WebSocket):
     """Real-time streaming simulation emitting continuous transaction authorizations"""
