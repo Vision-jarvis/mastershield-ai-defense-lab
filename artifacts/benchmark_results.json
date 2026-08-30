@@ -1,0 +1,138 @@
+{
+  "model_tag": "MasterShield-Enterprise-v2026.2",
+  "timestamp": "2026-08-30 19:47:15",
+  "dataset_size": 20000,
+  "fraud_samples": 99,
+  "fraud_ratio": 0.005,
+  "global_metrics": {
+    "roc_auc": 0.9768,
+    "pr_auc": 0.8856,
+    "precision": 1.0,
+    "recall": 0.8081,
+    "f1_score": 0.8939,
+    "false_positive_rate": 0.0,
+    "stepup_rate_benign": 0.0001,
+    "stepup_rate_fraud": 0.0002,
+    "fraud_dollars_prevented_ratio": 0.9025,
+    "total_prevented_fraud_usd": 356006.01
+  },
+  "comparative_baselines": {
+    "rules_only_engine": {
+      "precision": 0.0293,
+      "recall": 0.404,
+      "f1_score": 0.0546,
+      "fpr": 0.06658
+    },
+    "tier1_gbdt_standalone": {
+      "roc_auc": 0.9733,
+      "pr_auc": 0.8871,
+      "precision": 1.0,
+      "recall": 0.798,
+      "f1_score": 0.8876,
+      "fpr": 0.0
+    },
+    "mastershield_unified_defense": {
+      "roc_auc": 0.9768,
+      "pr_auc": 0.8856,
+      "precision": 1.0,
+      "recall": 0.8081,
+      "f1_score": 0.8939,
+      "fpr": 0.0
+    }
+  },
+  "adversarial_warmup_ablation": {
+    "baseline_detection_recall": 0.8081,
+    "warmed_account_evasion_recall": 0.798,
+    "evasion_recall_delta": 0.0101,
+    "finding": "When adversaries simulate organic 6-month transaction histories (warm-up accounts with 4-8 prior transactions), velocity heuristics degrade and detection recall drops by 1.01% (from 80.81% to 79.80%), demonstrating that point-in-time velocity checks can be systematically evaded by seasoned accounts."
+  },
+  "latency_profile_ms": {
+    "mean": 4.96,
+    "p50": 4.7,
+    "p90": 6.15,
+    "p95": 6.83,
+    "p99": 17.47,
+    "max": 84.4,
+    "sla_target_ms": 9.8,
+    "sla_compliance_pct": 97.86
+  },
+  "per_vector_breakdown": {
+    "ADV_01_AGENTIC_HIJACK": {
+      "total_attacks": 9,
+      "fully_declined": 9,
+      "stepped_up": 0,
+      "overall_recall": 1.0,
+      "avg_risk_score": 0.9769
+    },
+    "ADV_02_DISPUTE_HALLUCINATION": {
+      "total_attacks": 9,
+      "fully_declined": 9,
+      "stepped_up": 0,
+      "overall_recall": 1.0,
+      "avg_risk_score": 0.985
+    },
+    "ADV_06_SYNTHETIC_IDENTITY": {
+      "total_attacks": 9,
+      "fully_declined": 9,
+      "stepped_up": 0,
+      "overall_recall": 1.0,
+      "avg_risk_score": 0.9998
+    },
+    "ADV_11_BIOMETRIC_EVASION": {
+      "total_attacks": 9,
+      "fully_declined": 1,
+      "stepped_up": 1,
+      "overall_recall": 0.1111,
+      "avg_risk_score": 0.1388
+    },
+    "ADV_12_DEEPFAKE_STEPUP": {
+      "total_attacks": 9,
+      "fully_declined": 9,
+      "stepped_up": 0,
+      "overall_recall": 1.0,
+      "avg_risk_score": 0.9576
+    },
+    "ADV_16_ROUTER_EVAPORATION": {
+      "total_attacks": 9,
+      "fully_declined": 8,
+      "stepped_up": 1,
+      "overall_recall": 0.8889,
+      "avg_risk_score": 0.7504
+    },
+    "ADV_21_DYNAMIC_QR_CAMOUFLAGE": {
+      "total_attacks": 9,
+      "fully_declined": 9,
+      "stepped_up": 0,
+      "overall_recall": 1.0,
+      "avg_risk_score": 0.9505
+    },
+    "ADV_22_APP_SCAM_GROOMING": {
+      "total_attacks": 9,
+      "fully_declined": 8,
+      "stepped_up": 1,
+      "overall_recall": 0.8889,
+      "avg_risk_score": 0.878
+    },
+    "ADV_26_AUTONOMOUS_MULE_SWARM": {
+      "total_attacks": 9,
+      "fully_declined": 9,
+      "stepped_up": 0,
+      "overall_recall": 1.0,
+      "avg_risk_score": 0.9973
+    },
+    "ADV_28_CYCLIC_TRANSIT_WASH": {
+      "total_attacks": 9,
+      "fully_declined": 9,
+      "stepped_up": 0,
+      "overall_recall": 1.0,
+      "avg_risk_score": 0.9998
+    },
+    "ADV_30_DEFENSE_POISONING_ATTACK": {
+      "total_attacks": 9,
+      "fully_declined": 0,
+      "stepped_up": 0,
+      "overall_recall": 0.0,
+      "avg_risk_score": 0.0001
+    }
+  }
+}
