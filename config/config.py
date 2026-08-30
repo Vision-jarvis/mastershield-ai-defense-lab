@@ -121,7 +121,7 @@ class AttackOntologyConfig:
             "rejection_code": "X-MC-AGNT",
             "genai_mechanism": "Multi-turn LLM social engineering targeting bank customer service agents to trigger unauthorized 2FA phone/email resets.",
             "baseline_blindspot": "Customer support transcripts are unmonitored by real-time auth scoring engines.",
-            "is_simulated": True
+            "is_simulated": False
         },
         "ADV_04_AUTONOMOUS_PROCUREMENT_DRAIN": {
             "family": "Agentic Commerce",
@@ -163,7 +163,7 @@ class AttackOntologyConfig:
             "rejection_code": "X-MC-SYNI",
             "genai_mechanism": "Virtual camera drivers injecting generative 3D facial avatars passing passive and active liveness challenges.",
             "baseline_blindspot": "Standard liveness SDKs focus on blink/head-turn without detecting synthetic facial micro-texture anomalies.",
-            "is_simulated": True
+            "is_simulated": False
         },
         "ADV_08_FAKE_MERCHANT_KYB": {
             "family": "Synthetic Identity",
@@ -183,7 +183,7 @@ class AttackOntologyConfig:
             "rejection_code": "X-MC-SYNI",
             "genai_mechanism": "Sleeper networks building high transaction reputation before executing coordinated credit limit exhaustion.",
             "baseline_blindspot": "High historical payment scores mask coordinated sudden bust-out actions across disparate issuers.",
-            "is_simulated": True
+            "is_simulated": False
         },
         "ADV_10_SYNTHETIC_EMPLOYEE_PAYROLL": {
             "family": "Synthetic Identity",
@@ -267,7 +267,7 @@ class AttackOntologyConfig:
             "rejection_code": "AM23",
             "genai_mechanism": "Predictive models optimizing Luhn check generation and merchant selection to minimize issuer testing alert triggers.",
             "baseline_blindspot": "Card testing engines monitor single-merchant surges while attackers distribute across 500+ small merchant gateways.",
-            "is_simulated": True
+            "is_simulated": False
         },
         "ADV_18_TRANSACTION_LAUNDERING_MCC": {
             "family": "Payment Routing",
@@ -349,7 +349,7 @@ class AttackOntologyConfig:
             "rejection_code": "RR04",
             "genai_mechanism": "Instant automated routing of stolen funds into crypto on-ramps within 3 seconds of real-time rail credit.",
             "baseline_blindspot": "ISO 20022 camt.056 recall requests take minutes/hours, arriving after funds have exited the banking perimeter.",
-            "is_simulated": True
+            "is_simulated": False
         },
 
         # --- Family 6: Multi-Hop Swarms & Graph Laundering ---
@@ -371,7 +371,7 @@ class AttackOntologyConfig:
             "rejection_code": "X-MC-MULE",
             "genai_mechanism": "Coordinated micro-deposits from 200+ mules aggregating into intermediate offshore accounts.",
             "baseline_blindspot": "Transaction monitoring rules evaluate accounts in isolation rather than analyzing collective temporal flow balance.",
-            "is_simulated": True
+            "is_simulated": False
         },
         "ADV_28_CYCLIC_TRANSIT_WASH": {
             "family": "Graph Laundering",

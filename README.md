@@ -138,8 +138,8 @@ Seeded initialization makes data generation and call sequences deterministic. `H
 ### 1. Installation
 ```bash
 # Clone the repository
-git clone https://github.com/MasterCard-Defense-Lab/MasterShield-AI.git
-cd MasterShield-AI
+git clone https://github.com/Vision-jarvis/mastershield-ai-defense-lab.git
+cd mastershield-ai-defense-lab
 
 # Install dependencies
 pip install -r requirements.txt
