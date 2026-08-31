@@ -25,6 +25,7 @@ from docx.oxml.ns import nsdecls
 from config.config import ARTIFACTS_DIR, BASE_DIR, attacks_cfg
 
 REPO_URL = "https://github.com/Vision-jarvis/mastershield-ai-defense-lab"
+LIVE_URL = "https://mastershield-ai.vercel.app"
 
 COLOR_PRIMARY = RGBColor(235, 0, 27)
 COLOR_SECONDARY = RGBColor(247, 158, 27)
@@ -134,9 +135,9 @@ def build_writeup():
            ["2", "Solution walkthrough (.docx)",
             "Mastercard_AI_Defense_Lab_Solution_Walkthrough.docx (attached; repo root)"],
            ["3", "Working web prototype",
-            "python web_app/server.py --port 8000  ->  http://localhost:8000"]],
+            f"LIVE, no setup required: {LIVE_URL}"]],
           widths=[0.3, 1.9, 4.6], font=8.4)
-    para(doc, "Run the prototype in under a minute:", bold=True, after=3)
+    para(doc, "The prototype is hosted and requires no setup. To run it locally instead:", bold=True, after=3)
     mono = doc.add_paragraph()
     mono.paragraph_format.space_after = Pt(4)
     r = mono.add_run(f"git clone {REPO_URL}.git\n"

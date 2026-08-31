@@ -8,8 +8,11 @@
 [![Tests](https://img.shields.io/badge/Tests-9%2F9_passing-00E599.svg)]()
 [![ROC-AUC](https://img.shields.io/badge/ROC--AUC-0.9768-00F0FF.svg)]()
 [![Prevalence](https://img.shields.io/badge/Benchmarked_at-0.50%25_prevalence-F79E1B.svg)]()
+[![Live Demo](https://img.shields.io/badge/Live_prototype-mastershield--ai.vercel.app-000000.svg?logo=vercel)](https://mastershield-ai.vercel.app)
 
 Track: AI Defense Lab for Payment Security. Build the attack, then build the defense.
+
+**Live prototype: https://mastershield-ai.vercel.app**
 
 GenAI collapsed the cost of producing convincing payment fraud. MasterShield answers with a loop, not a classifier: a red team that maps and simulates 30 emerging attack vectors, a three-tier defense that scores them in real time, and a feedback path where every evasion becomes training data for the next round.
 
@@ -224,7 +227,8 @@ tests/       Red team, blue team, closed-loop integration
 
 - **Code repository** — this repo.
 - **Solution walkthrough** — [`Mastercard_AI_Defense_Lab_Solution_Walkthrough.docx`](./Mastercard_AI_Defense_Lab_Solution_Walkthrough.docx)
-- **Web prototype** — `python web_app/server.py --port 8000`. Live stream, graph visualiser, attack injection, feature attribution, ISO 20022 inspector.
+- **Web prototype** — **https://mastershield-ai.vercel.app** (hosted, no setup). Or locally: `python web_app/server.py --port 8000`. Live stream, graph visualiser, attack injection, feature attribution, ISO 20022 inspector.
+  Serverless hosting cannot hold WebSockets, so the hosted live feed polls `/api/live_batch`; local runs use the WebSocket.
 - **Technical report** — [`MasterShield_AI_Defense_Lab_Final_Report.md`](./MasterShield_AI_Defense_Lab_Final_Report.md)
 
 All payment data is synthetic. No real cardholder, transaction, or biometric data was used.
