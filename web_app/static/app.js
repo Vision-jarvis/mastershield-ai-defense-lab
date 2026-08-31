@@ -248,11 +248,19 @@
       links.push({ a: nodes.length - 2, b: nodes.length - 1, r: tx.fraud_probability || 0 });
       if (links.length > 26) links.shift();
     }
+    wake();
   }
-  let last = 0;
+  // The loop runs only while nodes are still easing in, then stops. A canvas
+  // that animates forever keeps the page from ever reaching idle, which costs
+  // battery and blocks assistive and automation tooling.
+  let last = 0, running = false, settleUntil = 0;
+  function wake() {
+    settleUntil = performance.now() + 900;
+    if (!running) { running = true; requestAnimationFrame(paint); }
+  }
   function paint(ts) {
-    const c = el.graph; if (!c) return;
-    if (document.hidden) { setTimeout(() => requestAnimationFrame(paint), 420); return; }
+    const c = el.graph; if (!c) { running = false; return; }
+    if (document.hidden) { running = false; return; }
     if (ts && ts - last < 55) { requestAnimationFrame(paint); return; }
     last = ts || 0;
     const ctx = c.getContext("2d"), dpr = devicePixelRatio || 1;
@@ -277,9 +285,11 @@
       ctx.beginPath(); ctx.arc(n.x * w, n.y * h, rad, 0, 6.284);
       ctx.fillStyle = col; ctx.fill();
     });
-    requestAnimationFrame(paint);
+    if (performance.now() < settleUntil) requestAnimationFrame(paint);
+    else running = false;
   }
-  requestAnimationFrame(paint);
+  addEventListener("visibilitychange", () => { if (!document.hidden) wake(); });
+  wake();
 
   /* ---------------- stream ---------------- */
   const setPill = (on, txt) => { el.pillTxt.textContent = txt; el.pill.classList.toggle("on", on); };
