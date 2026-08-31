@@ -1,214 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MasterShield AI | Mastercard Innovation Challenge @ GFF 2026</title>
-  <link rel="stylesheet" href="/static/styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MasterShield AI | Mastercard Innovation Challenge @ GFF 2026</title>
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Top Header Navigation -->
-  <header>
-    <div class="logo-container">
-      <div class="mc-circles">
-        <div class="circle-red"></div>
-        <div class="circle-orange"></div>
-      </div>
-      <div>
-        <div class="brand-title">
-          MasterShield AI <span class="brand-badge">GFF 2026</span>
-        </div>
-        <div style="font-size: 0.72rem; color: var(--text-secondary);">
-          AI Defense Lab for Payment Security · Closed-Loop Red/Blue System
-        </div>
-      </div>
+<header class="topbar">
+  <div class="brand">
+    <span class="mc-mark"><i></i><i></i></span>
+    <span class="brand-text">
+      <strong>MasterShield AI</strong>
+      <small>Closed-loop red/blue defense lab &middot; Mastercard Innovation Challenge @ GFF 2026</small>
+    </span>
+  </div>
+  <div class="topbar-right">
+    <span class="pill" id="streamPill"><span class="dot"></span><span id="wsStatusText">connecting</span></span>
+    <a class="pill pill-link" href="https://github.com/Vision-jarvis/mastershield-ai-defense-lab" target="_blank" rel="noopener">Source</a>
+  </div>
+</header>
+
+<!-- Orientation strip: tells a first-time viewer what they're looking at -->
+<section class="explainer">
+  <div class="explainer-inner">
+    <div class="explainer-lead">
+      <h1>Build the attack, then build the defense.</h1>
+      <p>This cockpit runs the full loop live. The <strong>red team</strong> generates GenAI payment fraud, the
+      <strong>blue team</strong> scores it in real time across three tiers, and every miss feeds back as training
+      data. Everything below is computed on this server, not replayed from a recording.</p>
     </div>
-    
-    <div class="header-status">
-      <div class="status-pill">
-        <span class="pulse-dot"></span>
-        <span id="wsStatusText">LIVE SIMULATION ACTIVE</span>
-      </div>
-      <div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
-        P99 SLA: <span style="color: var(--accent-green); font-weight: 700;">4.82ms</span> (Target: &lt;9.8ms)
-      </div>
+    <ol class="explainer-steps">
+      <li><span>1</span><b>Identify</b>30 attack vectors mapped across 6 families</li>
+      <li><span>2</span><b>Generate</b>11 executable generators, multi-rail telemetry</li>
+      <li><span>3</span><b>Defend</b>3-tier engine under a &lt;10&nbsp;ms budget</li>
+      <li><span>4</span><b>Harden</b>evasions mined and retrained</li>
+    </ol>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <!-- KPI band: all values fetched from /api/benchmark -->
+  <section class="kpi-band">
+    <div class="kpi-head">
+      <h2>Benchmark results</h2>
+      <p class="muted" id="benchProvenance">Loading measured run&hellip;</p>
     </div>
-  </header>
+    <div class="kpi-grid" id="kpiGrid"></div>
+  </section>
 
-  <!-- Main Layout -->
-  <main class="main-layout">
+  <div class="grid-2">
 
-    <!-- Metrics Ribbon -->
-    <section class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-label">Detection Recall</div>
-        <div class="metric-value" style="color: var(--accent-green);" id="metricRecall">95.0%</div>
-        <div class="metric-sub">▲ +65% vs Static Rule Baselines</div>
+    <!-- RED TEAM -->
+    <section class="card">
+      <div class="card-head">
+        <h3><svg viewBox="0 0 24 24" class="ico"><path d="M12 2 3 7v6c0 5 3.8 8.7 9 9 5.2-.3 9-4 9-9V7z"/><path d="m9 12 2 2 4-4"/></svg>Red team attack studio</h3>
+        <span class="tag tag-red">Pillar 1 &amp; 2</span>
       </div>
-      
-      <div class="metric-card">
-        <div class="metric-label">False Positive Rate (FPR)</div>
-        <div class="metric-value" style="color: var(--accent-cyan);" id="metricFPR">0.070%</div>
-        <div class="metric-sub">✔ Ultra-Low Production Friction</div>
-      </div>
+      <p class="card-sub">Pick a vector and inject it into the live authorization stream. The defense has no
+        advance knowledge of what you send.</p>
 
-      <div class="metric-card">
-        <div class="metric-label">P99 Authorization Latency</div>
-        <div class="metric-value" style="color: var(--mc-orange);" id="metricLatency">8.20 ms</div>
-        <div class="metric-sub">⚡ Tier-1 Quantized Edge Acceleration (SLA: &lt;9.8ms)</div>
+      <label class="lbl" for="attackVectorSelect">Attack vector <span class="hint" data-tip="The MPAM v2.0 taxonomy maps 30 GenAI payment fraud vectors. The 11 listed here have executable generators that emit full transaction telemetry.">?</span></label>
+      <select id="attackVectorSelect"></select>
+
+      <div class="vec-detail" id="vectorDescription">
+        <div class="skel"></div><div class="skel short"></div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-label">Prevented Fraud Volume</div>
-        <div class="metric-value" style="color: #fff;" id="metricPrevented">$4,289,150</div>
-        <div class="metric-sub">🛡 99.1% High-Value Dollar Protection</div>
+      <div class="row-2">
+        <div>
+          <label class="lbl" for="advStrength">Adversarial strength <b id="strengthValue">1.0&times;</b>
+            <span class="hint" data-tip="Scales the attack's evasion effort. Higher values push amounts and behavioural telemetry further toward the legitimate distribution, making detection harder.">?</span></label>
+          <input type="range" id="advStrength" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div>
+          <label class="lbl" for="attackAmount">Amount <span class="hint" data-tip="Leave blank to sample from the vector's own realistic amount distribution.">?</span></label>
+          <input type="number" id="attackAmount" placeholder="auto" min="5" max="50000">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btnInjectAttack">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M13 2 3 14h8l-1 8 10-12h-8z"/></svg>
+        Inject adversarial attack
+      </button>
+
+      <div class="verdict" id="injectVerdict" hidden></div>
+
+      <details class="acc">
+        <summary>Run closed-loop co-evolution</summary>
+        <p class="muted small">Runs multiple red/blue rounds: the red team mutates against current defense
+          feedback, the blue team mines the evasions and retrains. This is compute-heavy and may take several
+          minutes on the hosted demo.</p>
+        <button class="btn btn-ghost" id="btnRunCoEvolution">Trigger 5-round hardening</button>
+        <div class="small" id="coevolutionStatus"></div>
+      </details>
+    </section>
+
+    <!-- BLUE TEAM -->
+    <section class="card">
+      <div class="card-head">
+        <h3><svg viewBox="0 0 24 24" class="ico"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>Live authorization stream</h3>
+        <span class="tag tag-cyan">Pillar 3</span>
+      </div>
+      <p class="card-sub">Every transaction is scored against prior graph state only, then ingested. No lookahead.
+        Click any row to inspect its decision.</p>
+
+      <div class="tier-bar" id="tierBar">
+        <div class="tier"><span>Tier 1 GBDT</span><b id="liveLatT1">&mdash;</b></div>
+        <div class="tier"><span>Tier 2 graph</span><b id="liveLatT2">&mdash;</b></div>
+        <div class="tier"><span>Tier 3 semantic</span><b id="liveLatT3">&mdash;</b></div>
+        <div class="tier tier-total"><span>End to end</span><b id="liveLatTotal">&mdash;</b></div>
+      </div>
+
+      <div class="feed" id="liveFeed">
+        <div class="feed-empty">Waiting for the first transaction&hellip;</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- PER-VECTOR RESULTS -->
+  <section class="card">
+    <div class="card-head">
+      <h3><svg viewBox="0 0 24 24" class="ico"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Detection by attack vector</h3>
+      <span class="tag tag-amber">Measured</span>
+    </div>
+    <p class="card-sub">Recall per vector on the benchmark holdout. Click a bar for the vector's threat profile.
+      Nine samples per vector, so treat these as relative difficulty rather than precise point estimates.</p>
+    <div class="bars" id="vectorBars"></div>
+    <div class="legend">
+      <span><i class="sw sw-green"></i>Detected reliably</span>
+      <span><i class="sw sw-amber"></i>Partial detection</span>
+      <span><i class="sw sw-red"></i>Open gap, conceded</span>
+    </div>
+  </section>
+
+  <div class="grid-2">
+    <!-- GRAPH -->
+    <section class="card">
+      <div class="card-head">
+        <h3><svg viewBox="0 0 24 24" class="ico"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 7l4 9M17 7l-4 9M7 6h10"/></svg>Transaction graph</h3>
+        <span class="tag tag-violet">Tier 2</span>
+      </div>
+      <p class="card-sub">Live counterparty topology. Tier 2 watches pass-through flow balance, fan-in
+        concentration and payment cycles, which is how mule swarms and layering rings surface.</p>
+      <canvas id="graphCanvas" width="560" height="300"></canvas>
+      <div class="legend">
+        <span><i class="sw sw-cyan"></i>Normal counterparty</span>
+        <span><i class="sw sw-amber"></i>Elevated flow</span>
+        <span><i class="sw sw-red"></i>Flagged topology</span>
       </div>
     </section>
 
-    <!-- 3-Column Dashboard Grid -->
-    <section class="dashboard-grid">
-
-      <!-- Column 1: Pillar 1 & 2 - Red Team Attack Studio -->
-      <div class="panel-card">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>🔥</span> Red Team Attack Studio
-          </div>
-          <span class="panel-tag tag-red">Pillar 1 &amp; 2: GenAI</span>
-        </div>
-
-        <div class="control-group">
-          <label class="control-label" for="attackVectorSelect">Adversarial Threat Vector (MPAM v2.0)</label>
-          <select id="attackVectorSelect">
-            <option value="ADV_01_AGENTIC_HIJACK">ADV-01: Agentic Commerce Wallet Hijack</option>
-            <option value="ADV_02_DISPUTE_HALLUCINATION">ADV-02: Dispute Hallucination Injection</option>
-            <option value="ADV_06_SYNTHETIC_SLEEPER">ADV-06: Synthetic Identity Sleeper Ring</option>
-            <option value="ADV_11_BIOMETRIC_EVASION">ADV-11: Sub-Perceptual Biometric Evasion</option>
-            <option value="ADV_12_DEEPFAKE_STEPUP">ADV-12: Multimodal 3DS 2.3 Deepfake</option>
-            <option value="ADV_16_ROUTER_EVAPORATION">ADV-16: Router Slicing &amp; MCC Hopping</option>
-            <option value="ADV_21_DYNAMIC_QR_CAMOUFLAGE">ADV-21: Dynamic QR &amp; VPA Camouflage</option>
-            <option value="ADV_22_APP_SCAM_GROOMING">ADV-22: APP Scam Multi-Turn Grooming</option>
-            <option value="ADV_26_MULE_SWARM">ADV-26: Low-Centrality Mule Mesh Swarm</option>
-            <option value="ADV_28_CYCLIC_MULE_ROUTING">ADV-28: Cyclic Multi-Hop Round-Trip</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <div class="control-label" style="display:flex; justify-content:space-between;">
-            <span>Adversarial Strength &amp; Mutation</span>
-            <span id="strengthValue" style="color:var(--mc-orange); font-weight:700;">1.0x</span>
-          </div>
-          <div class="range-slider">
-            <input type="range" id="advStrength" min="0.5" max="2.0" step="0.1" value="1.0">
-          </div>
-        </div>
-
-        <div class="control-group">
-          <label class="control-label">Transaction Amount ($ / ₹)</label>
-          <input type="number" id="attackAmount" placeholder="Auto-generate by vector distribution" min="5" max="50000">
-        </div>
-
-        <button class="btn" id="btnInjectAttack">
-          <span>⚡</span> Inject Adversarial Attack
-        </button>
-
-        <div style="margin-top:0.5rem;">
-          <div class="control-label" style="margin-bottom:0.35rem;">Attack Vector Threat Profile</div>
-          <div id="vectorDescription" style="font-size:0.75rem; color:var(--text-secondary); background:rgba(0,0,0,0.3); padding:0.6rem; border-radius:6px; line-height:1.4;">
-            Loading threat ontology...
-          </div>
-        </div>
-
-        <!-- Co-Evolution Trigger -->
-        <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--border-color);">
-          <button class="btn btn-secondary" style="width:100%;" id="btnRunCoEvolution">
-            <span>🔄</span> Trigger Closed-Loop Co-Evolution (5 Rounds)
-          </button>
-          <div id="coevolutionStatus" style="font-size:0.7rem; color:var(--accent-cyan); text-align:center; margin-top:0.35rem;"></div>
-        </div>
+    <!-- ATTRIBUTION -->
+    <section class="card">
+      <div class="card-head">
+        <h3><svg viewBox="0 0 24 24" class="ico"><path d="M3 3v18h18"/><path d="M7 15l4-6 3 4 4-7"/></svg>Decision attribution</h3>
+        <span class="tag tag-green">Explainability</span>
       </div>
-
-      <!-- Column 2: Pillar 3 - Blue Team Live Authorization Stream -->
-      <div class="panel-card">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>🛡</span> Live Authorization Stream
-          </div>
-          <span class="panel-tag tag-blue">Pillar 3: Multi-Tier Defense</span>
-        </div>
-
-        <div class="feed-list" id="txFeedList">
-          <!-- Feed items dynamically inserted here -->
-        </div>
-
-        <!-- Latency Breakdown -->
-        <div style="background:rgba(5,8,15,0.6); padding:0.75rem; border-radius:8px; border:1px solid var(--border-color);">
-          <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:0.35rem; display:flex; justify-content:space-between;">
-            <span>Multi-Tier Latency Breakdown</span>
-            <span style="color:var(--accent-green);" id="liveLatTotal">Total: 4.8ms</span>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; font-size:0.7rem; font-family:var(--font-mono); text-align:center;">
-            <div style="background:rgba(255,255,255,0.04); padding:0.3rem; border-radius:4px;">
-              <div style="color:var(--text-muted);">Tier 1 GBDT</div>
-              <div style="color:var(--accent-cyan); font-weight:700;" id="liveLatT1">1.2 ms</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.04); padding:0.3rem; border-radius:4px;">
-              <div style="color:var(--text-muted);">Tier 2 Graph</div>
-              <div style="color:var(--accent-purple); font-weight:700;" id="liveLatT2">2.1 ms</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.04); padding:0.3rem; border-radius:4px;">
-              <div style="color:var(--text-muted);">Tier 3 Semantic</div>
-              <div style="color:var(--mc-orange); font-weight:700;" id="liveLatT3">1.5 ms</div>
-            </div>
-          </div>
-        </div>
+      <p class="card-sub">Why the engine decided what it did. Computed by background-baseline occlusion: each
+        feature is neutralised in turn to measure its contribution. Every decline carries this trail plus an
+        ISO 20022 rejection code.</p>
+      <div class="attrib" id="shapPanel">
+        <div class="feed-empty">Select a transaction in the live stream, or inject an attack.</div>
       </div>
-
-      <!-- Column 3: Graph Topology & Explainability Inspector -->
-      <div class="panel-card">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>🕸</span> Dynamic Transaction Graph
-          </div>
-          <span class="panel-tag tag-purple">Tier 2 Anomaly Engine</span>
-        </div>
-
-        <div class="graph-container">
-          <canvas id="graphCanvas"></canvas>
-        </div>
-
-        <!-- Explainability & ISO Reason -->
-        <div class="panel-header" style="margin-top:0.25rem;">
-          <div class="panel-title" style="font-size:0.85rem;">
-            <span>📊</span> SHAP Feature Attribution
-          </div>
-          <span id="inspectedTxId" style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-secondary);">Select a TX</span>
-        </div>
-
-        <div class="shap-bar-container" id="shapContainer">
-          <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:1rem;">
-            Click on any declined transaction in the live feed to inspect its SHAP decision explanation.
-          </div>
-        </div>
-
-        <!-- ISO 20022 Audit Payload -->
-        <div class="panel-header" style="margin-top:0.25rem;">
-          <div class="panel-title" style="font-size:0.85rem;">
-            <span>📜</span> ISO 20022 Audit Payload (pacs.002 / camt.056)
-          </div>
-        </div>
-
-        <pre id="isoCodeBlock">{\n  "Status": "Awaiting Transaction Inspection..."\n}</pre>
-      </div>
-
     </section>
+  </div>
 
-  </main>
+  <!-- SELF AUDIT -->
+  <section class="card card-audit">
+    <div class="card-head">
+      <h3><svg viewBox="0 0 24 24" class="ico"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>We red-teamed our own benchmark</h3>
+      <span class="tag tag-red">Methodology</span>
+    </div>
+    <p class="card-sub">An early build of this system reported <b>100% recall and 1.0000 ROC-AUC</b>. A leakage
+      audit proved those numbers were the simulator labelling its own attacks: a depth-1 decision stump on
+      <i>account-name string length</i> reproduced the entire result. We found nine defects, fixed each in code,
+      and re-benchmarked honestly. The numbers above are what survived.</p>
+    <div class="audit-grid" id="auditGrid"></div>
+  </section>
 
-  <script src="/static/app.js"></script>
+</main>
+
+<footer class="foot">
+  <div>
+    <b>Known limitations, stated plainly.</b>
+    P99 latency does not yet meet the 9.8&nbsp;ms target. ADV_30 feedback poisoning is undetected at 0% recall.
+    ADV_11 sub-perceptual biometric evasion sits at 11.1%. Serverless hosting cannot hold WebSockets, so this
+    deployment polls <code>/api/live_batch</code>; local runs stream over a socket.
+  </div>
+  <div class="muted small">All payment data is synthetic. No real cardholder, transaction, or biometric data was used.</div>
+</footer>
+
+<div class="tooltip" id="tooltip"></div>
+<script src="/static/app.js"></script>
 </body>
 </html>
