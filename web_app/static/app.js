@@ -290,8 +290,15 @@
       if (edges.length > 30) edges.shift();
     }
   }
-  function drawGraph() {
+  let lastDraw = 0;
+  function drawGraph(ts) {
     if (!canvas) return;
+    // Pause entirely in a background tab, and cap at ~20fps. An unthrottled
+    // 60fps loop burns CPU and battery for a mostly static topology view.
+    if (document.hidden) { setTimeout(() => requestAnimationFrame(drawGraph), 400); return; }
+    if (ts && ts - lastDraw < 50) { requestAnimationFrame(drawGraph); return; }
+    lastDraw = ts || 0;
+
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.clientWidth, h = canvas.clientHeight;
