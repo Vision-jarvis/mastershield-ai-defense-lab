@@ -35,3 +35,6 @@ Thumbs.db
 
 # Microsoft Office lock files
 ~$*
+
+# Local submission bundle (duplicates of tracked deliverables)
+SUBMIT/
