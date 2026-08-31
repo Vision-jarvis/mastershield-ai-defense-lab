@@ -32,3 +32,6 @@ Thumbs.db
 *.swp
 
 .vercel
+
+# Microsoft Office lock files
+~$*
