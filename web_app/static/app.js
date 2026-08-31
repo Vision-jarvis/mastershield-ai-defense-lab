@@ -12,7 +12,8 @@
     kpis: $("kpiGrid"), audit: $("auditGrid"), pill: $("streamPill"),
     pillTxt: $("wsStatusText"), tip: $("tooltip"), graph: $("graphCanvas"),
     prov: $("benchProvenance"),
-    t1: $("liveLatT1"), t2: $("liveLatT2"), t3: $("liveLatT3"), tt: $("liveLatTotal")
+    t1: $("liveLatT1"), t2: $("liveLatT2"), t3: $("liveLatT3"), tt: $("liveLatTotal"),
+    wake: $("wakeBar"), wakeMsg: $("wakeMsg"), wakeBtn: $("wakeBtn")
   };
 
   const BRAND = { red: "#EB001B", orange: "#FF5F00", yellow: "#F79E1B" };
@@ -28,6 +29,58 @@
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const kind = (d) => d === "DECLINE_FRAUD" ? "crit" : d === "CHALLENGE_STEPUP" ? "warn" : "ok";
   const label = (d) => d === "DECLINE_FRAUD" ? "Declined" : d === "CHALLENGE_STEPUP" ? "Step-up" : "Approved";
+
+  /* ---------------- cold start ----------------
+     Serverless sleeps when idle. Rather than let a judge click "Send attack"
+     into a 60s hang, we probe readiness up front, say so plainly, and offer a
+     button that warms the instance while showing elapsed time. */
+  let warm = false;
+
+  function fetchT(url, opts, ms) {
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), ms);
+    return fetch(url, Object.assign({ signal: ac.signal }, opts || {}))
+      .finally(() => clearTimeout(timer));
+  }
+
+  function showWake(state, msg, btn) {
+    el.wake.hidden = false;
+    el.wake.className = "wake" + (state ? " is-" + state : "");
+    if (msg) el.wakeMsg.textContent = msg;
+    if (btn !== undefined) { el.wakeBtn.disabled = !btn; el.wakeBtn.textContent = btn || "Waking…"; }
+  }
+
+  function markWarm() {
+    if (warm) return;
+    warm = true;
+    showWake("warm", "Defense engine is warm. Every control on this page is live.", "");
+    setTimeout(() => { el.wake.hidden = true; }, 4500);
+  }
+
+  function doWake(manual) {
+    const t0 = performance.now();
+    showWake("busy", "Waking the defense engine. Loading the model and warming the graph…", "Waking…");
+    const tick = setInterval(() => {
+      const s = Math.round((performance.now() - t0) / 1000);
+      el.wakeMsg.textContent = `Waking the defense engine… ${s}s elapsed. Cold starts can take up to a minute.`;
+    }, 1000);
+
+    return fetchT("/api/health", { cache: "no-store" }, 90000)
+      .then((r) => r.json())
+      .then((h) => {
+        clearInterval(tick);
+        if (h && h.defense_ready) { markWarm(); return true; }
+        showWake("busy", "Engine is up but still training its bootstrap model. Try again in a few seconds.", "Retry");
+        return false;
+      })
+      .catch(() => {
+        clearInterval(tick);
+        showWake(null, "Could not reach the engine. It may still be starting; try once more.", "Retry");
+        return false;
+      });
+  }
+
+  el.wakeBtn.addEventListener("click", () => doWake(true));
 
   /* ---------------- tooltips ---------------- */
   function place(t) {
@@ -319,9 +372,14 @@
   el.inject.addEventListener("click", () => {
     const body = { vector_id: el.select.value, adversarial_strength: parseFloat(el.strength.value) };
     const a = parseFloat(el.amount.value); if (!isNaN(a) && a > 0) body.amount = a;
-    el.inject.disabled = true; el.inject.textContent = "Scoring…";
-    fetch("/api/simulate_attack", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
-      .then((r) => r.json())
+    el.inject.disabled = true;
+    el.inject.textContent = warm ? "Scoring…" : "Waking engine, then scoring…";
+    if (!warm) showWake("busy", "Waking the defense engine to score your attack. This can take up to a minute on a cold start.", "Waking…");
+
+    fetchT("/api/simulate_attack", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+    }, 90000)
+      .then((r) => { markWarm(); return r.json(); })
       .then((d) => {
         const res = (d.results || [])[0]; if (!res) throw 0;
         const v = res.verdict || res, tx = res.transaction || {};
@@ -333,7 +391,9 @@
       })
       .catch(() => {
         el.ruling.hidden = false; el.ruling.className = "ruling";
-        el.ruling.innerHTML = "<p>Could not reach the scoring engine. The hosted demo may be cold-starting; try again shortly.</p>";
+        el.ruling.innerHTML = "<p>The engine did not respond in time. It is most likely still cold-starting. " +
+          "Use <b>Wake the demo</b> at the top of the page, then send the attack again.</p>";
+        showWake(null, "Scoring timed out, most likely a cold start. Wake the engine, then retry.", "Wake the demo");
       })
       .finally(() => { el.inject.disabled = false; el.inject.textContent = "Send attack to the authorization stream"; });
   });
@@ -353,10 +413,16 @@
   });
 
   /* ---------------- boot ---------------- */
+  const probe = setTimeout(
+    () => showWake("busy", "Waking the defense engine. Cold starts can take up to a minute…", "Waking…"),
+    2500
+  );
+
   Promise.all([
-    fetch("/api/attack_ontology").then((r) => r.json()).catch(() => ({})),
-    fetch("/api/benchmark").then((r) => r.json()).catch(() => null)
+    fetchT("/api/attack_ontology", null, 90000).then((r) => r.json()).catch(() => ({})),
+    fetchT("/api/benchmark", null, 90000).then((r) => r.json()).catch(() => null)
   ]).then(([ont, bench]) => {
+    clearTimeout(probe);
     ontology = (ont && ont.vectors) || {};
     const sim = Object.entries(ontology).filter(([, v]) => v.is_simulated);
     (sim.length ? sim : Object.entries(ontology)).forEach(([k, v]) => {
@@ -375,5 +441,14 @@
       el.kpis.innerHTML = '<p class="vacant">Benchmark artifact unavailable.</p>';
     }
     openSocket();
+
+    // Confirm the scoring path itself is ready, not just that static data loaded.
+    fetchT("/api/health", { cache: "no-store" }, 90000)
+      .then((r) => r.json())
+      .then((h) => {
+        if (h && h.defense_ready) markWarm();
+        else showWake("busy", "Engine is up but still training its bootstrap model.", "Check again");
+      })
+      .catch(() => showWake(null, "Engine is asleep. Wake it before sending an attack.", "Wake the demo"));
   });
 })();

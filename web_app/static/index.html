@@ -31,6 +31,16 @@
   </div>
 </header>
 
+<!-- Cold-start notice. Serverless sleeps when idle; the first request can be slow. -->
+<div class="wake" id="wakeBar" hidden>
+  <div class="wake-in">
+    <span class="wake-state" id="wakeState"></span>
+    <p id="wakeMsg">This demo runs serverless and sleeps when idle. The first request can take up to a minute
+      while the defense model loads.</p>
+    <button class="wake-btn" id="wakeBtn" type="button">Wake the demo</button>
+  </div>
+</div>
+
 <!-- ================= SUMMARY BAND ================= -->
 <section class="band">
   <span class="band-mark" aria-hidden="true"><i></i><i></i></span>

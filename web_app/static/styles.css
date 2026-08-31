@@ -82,6 +82,32 @@ code{font-family:var(--mono);font-size:.86em;background:var(--paper-3);padding:.
   @keyframes beat{0%,100%{opacity:1}50%{opacity:.35}}
 }
 
+/* ---------- cold-start notice ---------- */
+.wake{background:#FDF6E9;border-bottom:1px solid #EBD9B4}
+.wake.is-warm{background:var(--ok-bg);border-bottom-color:#BFE3D6}
+.wake.is-busy{background:#FDF0E6;border-bottom-color:#EBCBB4}
+.wake-in{
+  max-width:var(--max);margin:0 auto;padding:.62rem var(--gut);
+  display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;
+}
+.wake-in p{font-size:.79rem;color:var(--ink-2);flex:1;min-width:230px;line-height:1.45}
+.wake-state{
+  flex:none;width:9px;height:9px;border-radius:50%;background:var(--warn);
+}
+.wake.is-warm .wake-state{background:var(--ok)}
+.wake.is-busy .wake-state{background:var(--mc-orange)}
+@media (prefers-reduced-motion:no-preference){
+  .wake.is-busy .wake-state{animation:throb .9s ease-in-out infinite}
+  @keyframes throb{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
+}
+.wake-btn{
+  flex:none;padding:.44rem .85rem;border:1px solid var(--ink);border-radius:4px;background:var(--ink);
+  color:#fff;font-family:var(--display);font-size:.76rem;font-weight:700;cursor:pointer;transition:background .16s;
+}
+.wake-btn:hover:not(:disabled){background:var(--mc-red);border-color:var(--mc-red)}
+.wake-btn:disabled{background:transparent;color:var(--ink-3);border-color:var(--rule-2);cursor:default}
+.wake.is-warm .wake-btn{display:none}
+
 /* ---------- summary band ---------- */
 .band{position:relative;background:var(--paper-2);border-bottom:1px solid var(--rule);overflow:hidden}
 .band-mark{position:absolute;right:-90px;top:-120px;width:520px;height:340px;opacity:.09;pointer-events:none}
