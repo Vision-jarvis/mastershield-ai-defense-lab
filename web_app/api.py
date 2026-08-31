@@ -352,9 +352,31 @@ if WEB_STATIC_DIR.exists():
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    """Serves the MasterShield AI Defense Lab Web UI"""
+    """
+    Serves the cockpit UI.
+
+    Asset URLs are stamped with a content hash so a redeploy never leaves a
+    visitor on cached JS/CSS against a newer API. Without this, a returning
+    judge can load stale assets and see a half-rendered dashboard.
+    """
     html_file = WEB_STATIC_DIR / "index.html"
-    if html_file.exists():
-        with open(html_file, "r", encoding="utf-8") as f:
-            return f.read()
-    return "<h1>MasterShield AI Defense Lab is running...</h1>"
+    if not html_file.exists():
+        return "<h1>MasterShield AI Defense Lab is running...</h1>"
+
+    html = html_file.read_text(encoding="utf-8")
+
+    import hashlib
+    digest = hashlib.sha1()
+    for name in ("app.js", "styles.css"):
+        asset = WEB_STATIC_DIR / name
+        if asset.exists():
+            digest.update(asset.read_bytes())
+    v = digest.hexdigest()[:10]
+
+    html = html.replace("/static/styles.css", f"/static/styles.css?v={v}")
+    html = html.replace("/static/app.js", f"/static/app.js?v={v}")
+
+    return HTMLResponse(
+        content=html,
+        headers={"Cache-Control": "no-cache, must-revalidate"},
+    )
